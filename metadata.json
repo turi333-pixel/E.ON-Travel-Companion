@@ -1,0 +1,7 @@
+{
+  "name": "E.ON Travel Companion",
+  "description": "A professional, single-hub travel app for E.ON Project Services, providing office locations, business-friendly hotels, transport advice, and emergency support.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
