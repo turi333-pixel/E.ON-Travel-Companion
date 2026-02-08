@@ -16,18 +16,18 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeTab, setActiveTab }) => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 safe-bottom z-50">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 safe-bottom z-50">
       <div className="flex justify-around items-center h-16">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex flex-col items-center justify-center w-full h-full transition-colors ${
-              activeTab === tab.id ? 'text-red-600' : 'text-slate-400'
+            className={`flex flex-col items-center justify-center w-full h-full transition-all ${
+              activeTab === tab.id ? 'text-blue-600 scale-105' : 'text-slate-400 opacity-70'
             }`}
           >
             <i className={`fas ${tab.icon} text-lg mb-1`}></i>
-            <span className="text-[10px] font-medium uppercase tracking-wider">{tab.label}</span>
+            <span className="text-[9px] font-bold uppercase tracking-widest">{tab.label}</span>
           </button>
         ))}
       </div>

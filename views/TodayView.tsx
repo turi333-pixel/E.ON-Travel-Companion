@@ -67,13 +67,13 @@ const TodayView: React.FC<TodayViewProps> = ({ data, loading, onRefresh, onSearc
                 placeholder="Enter city or office..."
                 value={manualCity}
                 onChange={(e) => setManualCity(e.target.value)}
-                className="w-full bg-white/80 backdrop-blur-sm border border-slate-200 rounded-2xl py-4 pl-12 pr-4 shadow-sm focus:ring-2 focus:ring-red-500 focus:outline-none transition-all placeholder:text-slate-400 text-slate-900"
+                className="w-full bg-white border border-slate-200 rounded-2xl py-4 pl-12 pr-4 shadow-sm focus:ring-2 focus:ring-red-500 focus:outline-none transition-all placeholder:text-slate-400 text-slate-900"
               />
             </div>
             <button
               type="submit"
               disabled={!manualCity.trim()}
-              className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold shadow-lg disabled:opacity-50 transition-all"
             >
               Start Planning
             </button>

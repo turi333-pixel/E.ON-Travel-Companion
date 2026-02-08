@@ -1,15 +1,12 @@
 
 import { GoogleGenAI } from "@google/genai";
-import { LocationData } from "../types";
+import { LocationData, FlightStatusData } from "../types";
 
 export const fetchLocationInsights = async (
   location: string, 
   coords?: { latitude: number; longitude: number }
 ): Promise<LocationData> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  
-  // Maps grounding is only supported in Gemini 2.5 series models.
-  // When using googleMaps, we cannot use responseMimeType: "application/json".
   const model = 'gemini-2.5-flash';
   
   const prompt = `Analyze the business travel context for a location. 
@@ -17,17 +14,6 @@ export const fetchLocationInsights = async (
     
     Provide information suitable for an E.ON business traveler. 
     Focus on helping the traveler navigate local culture and professional etiquette.
-    
-    Include:
-    1. Nearest E.ON office address or main hub (be precise if GPS is provided).
-    2. 3 Business-friendly hotels nearby.
-    3. 3 Reliable business restaurants nearby.
-    4. Local transport guidance.
-    5. Nearest airport and routes.
-    6. Weather summary.
-    7. DEEP CULTURAL INSIGHTS: Social Etiquette, Business Norms, Dining & Tipping, and one useful local phrase.
-
-    IMPORTANT: Return the response strictly as a single JSON object. Do not include markdown formatting like \`\`\`json.
     
     JSON Structure:
     {
@@ -60,15 +46,77 @@ export const fetchLocationInsights = async (
 
   try {
     let rawText = response.text.trim();
-    // Remove potential markdown code blocks if the model ignored the instruction
     if (rawText.startsWith("```")) {
       rawText = rawText.replace(/^```json\n?/, "").replace(/\n?```$/, "");
     }
     const parsed = JSON.parse(rawText) as LocationData;
     return parsed;
   } catch (e) {
-    console.error("Failed to parse Gemini response", e, response.text);
-    throw new Error("Could not retrieve precise location data. Please try searching by city name.");
+    throw new Error("Could not retrieve precise location data.");
+  }
+};
+
+export const fetchFlightStatus = async (flightNumber: string, date: string): Promise<FlightStatusData> => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const model = 'gemini-3-flash-preview';
+
+  const prompt = `Search for the live flight status of flight "${flightNumber}" on date "${date}". 
+    Use queries such as "${flightNumber} flight status" and "${flightNumber} departure arrival status".
+    
+    Extract the following details and return as a raw JSON object:
+    {
+      "flightNumber": "${flightNumber}",
+      "status": "On Time | Delayed | Boarding | Departed | Landed | Cancelled | Unknown",
+      "departure": {
+        "airport": "Name/Code",
+        "scheduled": "HH:MM",
+        "estimated": "HH:MM (optional)",
+        "actual": "HH:MM (optional)",
+        "terminal": "string (optional)",
+        "gate": "string (optional)"
+      },
+      "arrival": {
+        "airport": "Name/Code",
+        "scheduled": "HH:MM",
+        "estimated": "HH:MM (optional)",
+        "actual": "HH:MM (optional)",
+        "terminal": "string (optional)",
+        "gate": "string (optional)"
+      }
+    }
+    If the status is unclear, ask for a more specific flight number. Return ONLY the JSON object.`;
+
+  const response = await ai.models.generateContent({
+    model: model,
+    contents: prompt,
+    config: {
+      tools: [{ googleSearch: {} }],
+    },
+  });
+
+  try {
+    let rawText = response.text.trim();
+    if (rawText.startsWith("```")) {
+      rawText = rawText.replace(/^```json\n?/, "").replace(/\n?```$/, "");
+    }
+    const parsed = JSON.parse(rawText);
+    
+    // Extract citations from grounding metadata
+    const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
+    const sources = chunks
+      .filter(chunk => chunk.web)
+      .map(chunk => ({
+        title: chunk.web.title || "Flight Status Source",
+        uri: chunk.web.uri
+      }));
+
+    return {
+      ...parsed,
+      lastUpdated: new Date().toLocaleTimeString(),
+      sources: sources
+    } as FlightStatusData;
+  } catch (e) {
+    throw new Error("Could not find status for flight " + flightNumber + ". Please check the flight number and date.");
   }
 };
 
@@ -76,7 +124,7 @@ export const reverseGeocode = async (lat: number, lon: number): Promise<string> 
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash',
-    contents: `Translate the coordinates ${lat}, ${lon} into a city name and country for business travel context. Return ONLY the city and country, e.g. "Essen, Germany".`,
+    contents: `Translate the coordinates ${lat}, ${lon} into a city name and country. Return ONLY "City, Country".`,
     config: {
       tools: [{ googleMaps: {} }],
       toolConfig: {

@@ -11,6 +11,29 @@ export interface LocationData {
   culture: CulturalInsights;
 }
 
+export interface FlightStatusData {
+  flightNumber: string;
+  status: 'On Time' | 'Delayed' | 'Boarding' | 'Departed' | 'Landed' | 'Cancelled' | 'Unknown';
+  departure: {
+    airport: string;
+    scheduled: string;
+    estimated?: string;
+    actual?: string;
+    terminal?: string;
+    gate?: string;
+  };
+  arrival: {
+    airport: string;
+    scheduled: string;
+    estimated?: string;
+    actual?: string;
+    terminal?: string;
+    gate?: string;
+  };
+  lastUpdated: string;
+  sources: { title: string; uri: string }[];
+}
+
 export interface CulturalInsights {
   etiquette: string;
   businessNorms: string;

@@ -14,10 +14,8 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Reference to the scrollable main container
   const scrollContainerRef = useRef<HTMLElement>(null);
 
-  // Always reset scroll to top when switching tabs
   useEffect(() => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTo(0, 0);
@@ -102,8 +100,7 @@ const App: React.FC = () => {
 
   return (
     <div className="h-screen flex flex-col max-w-md mx-auto relative overflow-hidden">
-      {/* Top Header - Using glassmorphism to show pattern */}
-      <header className="flex-shrink-0 z-40 glass-header border-b border-slate-200/50 px-6 py-4 flex justify-between items-center h-[72px]">
+      <header className="flex-shrink-0 z-40 glass-header px-6 py-4 flex justify-between items-center h-[72px]">
         <div className="flex items-center">
           <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center mr-3 shadow-sm shadow-red-200">
             <i className="fas fa-e text-white font-bold"></i>
@@ -115,15 +112,12 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      {/* Main Content Area - This is the scroll container */}
       <main 
         ref={scrollContainerRef}
         className="flex-1 overflow-y-auto relative"
       >
-        {/* Error Message inside main to ensure it scrolls or is handled contextually, 
-            but here it's better placed just below the header for visibility */}
         {error && (
-          <div className="mx-4 mt-4 bg-red-100/90 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center justify-between animate-in fade-in slide-in-from-top-2 duration-300 backdrop-blur-sm z-50 sticky top-4">
+          <div className="mx-4 mt-4 bg-red-50 border border-red-100 text-red-700 px-4 py-3 rounded-xl flex items-center justify-between animate-in fade-in slide-in-from-top-2 duration-300 backdrop-blur-md z-50 sticky top-4">
             <div className="flex items-center">
               <i className="fas fa-circle-exclamation mr-3 opacity-70"></i>
               <span className="text-xs font-medium">{error}</span>
@@ -137,7 +131,6 @@ const App: React.FC = () => {
         </div>
       </main>
 
-      {/* Navigation */}
       <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
     </div>
   );
